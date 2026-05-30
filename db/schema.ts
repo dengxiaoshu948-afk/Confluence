@@ -133,6 +133,14 @@ export const shareRecords = mysqlTable("share_records", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+// Follows (关注关系)
+export const follows = mysqlTable("follows", {
+  id: serial("id").primaryKey(),
+  followerId: bigint("followerId", { mode: "number", unsigned: true }).notNull(),
+  followingId: bigint("followingId", { mode: "number", unsigned: true }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 // Notifications
 export const notifications = mysqlTable("notifications", {
   id: serial("id").primaryKey(),
@@ -158,3 +166,4 @@ export type Discussion = typeof discussions.$inferSelect;
 export type DiscussionReply = typeof discussionReplies.$inferSelect;
 export type PointRecord = typeof pointRecords.$inferSelect;
 export type ShareRecord = typeof shareRecords.$inferSelect;
+export type Follow = typeof follows.$inferSelect;

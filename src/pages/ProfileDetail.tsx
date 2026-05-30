@@ -10,6 +10,7 @@ import {
   Download,
   MessageSquare,
   Heart,
+  User as UserIcon,
   Loader2,
   Trash2,
 } from "lucide-react";
@@ -27,6 +28,8 @@ export default function ProfileDetail() {
   const { data: myUploads, isLoading: uploadsLoading } = trpc.resource.myUploads.useQuery(undefined, { enabled: !!user && type === "uploads" });
   const { data: myStars, isLoading: starsLoading } = trpc.resource.myStars.useQuery(undefined, { enabled: !!user && type === "stars" });
   const { data: pointHistory } = trpc.points.myHistory.useQuery(undefined, { enabled: !!user && type === "points" });
+  const { data: followersList } = trpc.follow.followers.useQuery({ userId: user?.id || 0 }, { enabled: !!user && type === "followers" });
+  const { data: followingList } = trpc.follow.following.useQuery({ userId: user?.id || 0 }, { enabled: !!user && type === "following" });
 
   const deleteResource = trpc.resource.delete.useMutation({
     onSuccess: () => { utils.resource.myUploads.invalidate(); },
@@ -39,6 +42,8 @@ export default function ProfileDetail() {
     downloads: { title: "下载管理", subtitle: "你下载的资源记录", icon: Download },
     replies: { title: "我的回复", subtitle: "你在社区的所有回复", icon: MessageSquare },
     comments: { title: "我的评论", subtitle: "你在资源下的所有评论", icon: Heart },
+    followers: { title: "粉丝", subtitle: "关注你的人", icon: UserIcon },
+    following: { title: "关注", subtitle: "你关注的人", icon: UserIcon },
   };
 
   const info = titles[type || ""] || { title: "详情", subtitle: "", icon: FolderOpen };
@@ -109,6 +114,36 @@ export default function ProfileDetail() {
             ))}
           </div>
         ) : <div className="glass-card p-8 text-center text-sm text-slate-400">暂无积分记录</div>
+      )}
+
+      {type === "followers" && (
+        followersList?.length ? (
+          <div className="space-y-2">
+            {followersList.map((u) => (
+              <div key={u.id} className="glass-card p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shrink-0">
+                  <span className="text-white text-sm font-bold">{(u.name || "U").charAt(0).toUpperCase()}</span>
+                </div>
+                <span className="text-sm font-medium text-slate-800 dark:text-white">{u.name || "匿名用户"}</span>
+              </div>
+            ))}
+          </div>
+        ) : <div className="glass-card p-8 text-center text-sm text-slate-400">还没有粉丝</div>
+      )}
+
+      {type === "following" && (
+        followingList?.length ? (
+          <div className="space-y-2">
+            {followingList.map((u) => (
+              <div key={u.id} className="glass-card p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shrink-0">
+                  <span className="text-white text-sm font-bold">{(u.name || "U").charAt(0).toUpperCase()}</span>
+                </div>
+                <span className="text-sm font-medium text-slate-800 dark:text-white">{u.name || "匿名用户"}</span>
+              </div>
+            ))}
+          </div>
+        ) : <div className="glass-card p-8 text-center text-sm text-slate-400">还没有关注任何人</div>
       )}
 
       {type === "downloads" && (

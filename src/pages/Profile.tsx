@@ -68,6 +68,7 @@ export default function Profile() {
   const { data: myUploads, isLoading: uploadsLoading } = trpc.resource.myUploads.useQuery(undefined, { enabled: !!user });
   const { data: myStars, isLoading: starsLoading } = trpc.resource.myStars.useQuery(undefined, { enabled: !!user });
   const { data: pointHistory } = trpc.points.myHistory.useQuery(undefined, { enabled: !!user });
+  const { data: followCounts } = trpc.follow.counts.useQuery({ userId: user?.id || 0 }, { enabled: !!user });
   const utils = trpc.useUtils();
   const deleteResource = trpc.resource.delete.useMutation({
     onSuccess: () => { utils.resource.myUploads.invalidate(); },
@@ -91,10 +92,8 @@ export default function Profile() {
 
   const points = user.points || 0;
   const levelInfo = getLevelInfo(points);
-
-  // Mock data for follows/fans (will be real when backend is ready)
-  const followingCount = 0;
-  const followersCount = 0;
+  const followingCount = followCounts?.following || 0;
+  const followersCount = followCounts?.followers || 0;
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 relative z-10">
@@ -137,16 +136,16 @@ export default function Profile() {
           </Link>
         </div>
 
-        {/* Follow stats */}
+        {/* Follow stats - clickable */}
         <div className="flex gap-6 mt-4 pt-4 border-t border-slate-100 dark:border-white/5">
-          <div className="text-center">
+          <Link to="/profile/following" className="text-center hover:opacity-80 transition-opacity">
             <div className="text-lg font-bold text-slate-800 dark:text-white">{followingCount}</div>
             <div className="text-xs text-slate-400 dark:text-gray-500">关注</div>
-          </div>
-          <div className="text-center">
+          </Link>
+          <Link to="/profile/followers" className="text-center hover:opacity-80 transition-opacity">
             <div className="text-lg font-bold text-slate-800 dark:text-white">{followersCount}</div>
             <div className="text-xs text-slate-400 dark:text-gray-500">粉丝</div>
-          </div>
+          </Link>
           <div className="text-center">
             <div className="text-lg font-bold text-amber-500">{points}</div>
             <div className="text-xs text-slate-400 dark:text-gray-500">积分</div>
