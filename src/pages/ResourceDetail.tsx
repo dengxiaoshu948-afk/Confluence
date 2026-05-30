@@ -75,7 +75,39 @@ export default function ResourceDetail() {
   });
 
   const toggleStar = trpc.resource.toggleStar.useMutation({
-    onSuccess: () => {
+    onMutate: async () => {
+      // Cancel outgoing refetches
+      await utils.resource.isStarred.cancel({ resourceId, userId: user?.id });
+      await utils.resource.getById.cancel({ id: resourceId });
+
+      // Snapshot previous values
+      const prevStarred = utils.resource.isStarred.getData({ resourceId, userId: user?.id });
+      const prevResource = utils.resource.getById.getData({ id: resourceId });
+
+      // Optimistically update
+      utils.resource.isStarred.setData({ resourceId, userId: user?.id }, (old) => ({
+        starred: !(old?.starred ?? false),
+      }));
+      utils.resource.getById.setData({ id: resourceId }, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          starCount: (old.starCount || 0) + (prevStarred?.starred ? -1 : 1),
+        };
+      });
+
+      return { prevStarred, prevResource };
+    },
+    onError: (_err, _vars, context) => {
+      // Rollback on error
+      if (context?.prevStarred) {
+        utils.resource.isStarred.setData({ resourceId, userId: user?.id }, context.prevStarred);
+      }
+      if (context?.prevResource) {
+        utils.resource.getById.setData({ id: resourceId }, context.prevResource);
+      }
+    },
+    onSettled: () => {
       utils.resource.getById.invalidate({ id: resourceId });
       utils.resource.isStarred.invalidate({ resourceId, userId: user?.id });
     },
@@ -120,10 +152,24 @@ export default function ResourceDetail() {
     toggleStar.mutate({ resourceId });
   };
 
-  const handleSubmitComment = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!commentText.trim() || !user) return;
-    addComment.mutate({ resourceId, content: commentText.trim() });
+    const content = commentText.trim();
+    if (!content || !user || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setCommentText(""); // Clear immediately for instant feedback
+
+    try {
+      await addComment.mutateAsync({ resourceId, content });
+    } catch {
+      // On error, restore the text
+      setCommentText(content);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleShare = async () => {
@@ -373,11 +419,15 @@ export default function ResourceDetail() {
             <div className="flex justify-end mt-2">
               <button
                 type="submit"
-                disabled={!commentText.trim() || addComment.isPending}
+                disabled={!commentText.trim() || isSubmitting}
                 className="btn-primary text-sm disabled:opacity-50"
               >
-                <Send size={14} />
-                发表评论
+                {isSubmitting ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Send size={14} />
+                )}
+                {isSubmitting ? "发送中..." : "发表评论"}
               </button>
             </div>
           </form>

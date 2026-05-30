@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams, useNavigate, useLocation } from "react-router";
 import { trpc } from "@/providers/trpc";
 import {
   Search,
@@ -58,7 +58,9 @@ const sortOptions = [
 ];
 
 export default function Explore() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -81,7 +83,8 @@ export default function Explore() {
     } else {
       params.delete(key);
     }
-    setSearchParams(params);
+    // Use replace to avoid adding history entries
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
   };
 
   return (

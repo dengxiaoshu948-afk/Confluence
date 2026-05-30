@@ -29,17 +29,30 @@ export default function DiscussionDetail() {
     onSuccess: () => navigate("/community"),
   });
 
+  const [isSubmittingReply, setIsSubmittingReply] = useState(false);
+
   const addReply = trpc.discussion.addReply.useMutation({
     onSuccess: () => {
       utils.discussion.getById.invalidate({ id: discussionId });
-      setReplyText("");
     },
   });
 
-  const handleSubmitReply = (e: React.FormEvent) => {
+  const handleSubmitReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!replyText.trim() || !user) return;
-    addReply.mutate({ discussionId, content: replyText.trim() });
+    const content = replyText.trim();
+    if (!content || !user || isSubmittingReply) return;
+
+    setIsSubmittingReply(true);
+    setReplyText(""); // Clear immediately for instant feedback
+
+    try {
+      await addReply.mutateAsync({ discussionId, content });
+    } catch {
+      // On error, restore the text
+      setReplyText(content);
+    } finally {
+      setIsSubmittingReply(false);
+    }
   };
 
   if (isLoading) {
@@ -160,11 +173,15 @@ export default function DiscussionDetail() {
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={!replyText.trim() || addReply.isPending}
+                disabled={!replyText.trim() || isSubmittingReply}
                 className="btn-primary text-sm disabled:opacity-50"
               >
-                <Send size={14} />
-                发表回复
+                {isSubmittingReply ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Send size={14} />
+                )}
+                {isSubmittingReply ? "发送中..." : "发表回复"}
               </button>
             </div>
           </form>
