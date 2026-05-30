@@ -38,20 +38,57 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Force clean old icon files
+      - name: Replace app icons
         run: |
-          # Remove ANY XML-based adaptive/legacy icons that could override PNGs
+          echo "=== Replacing default Android icons with custom icon ==="
+          
+          # 1. Remove the adaptive icon directory that overrides PNGs
           rm -rf android/app/src/main/res/mipmap-anydpi-v26
+          echo "Removed mipmap-anydpi-v26"
+          
+          # 2. Remove default XML drawable icons
           rm -f android/app/src/main/res/drawable/ic_launcher_background.xml
           rm -f android/app/src/main/res/drawable/ic_launcher_foreground.xml
           rm -f android/app/src/main/res/drawable-v24/ic_launcher_background.xml
           rm -f android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml
           rm -f android/app/src/main/res/values/ic_launcher_background.xml
-          echo "Cleaned old XML icons"
+          echo "Removed XML icon resources"
           
-          # Verify only PNG icons remain
-          echo "Remaining launcher icons:"
+          # 3. Copy our custom icons to each mipmap density
+          for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            target_dir="android/app/src/main/res/mipmap-${density}"
+            mkdir -p "$target_dir"
+            
+            # Remove existing ic_launcher files
+            rm -f "$target_dir"/ic_launcher.*
+            
+            # Copy our PNG icon
+            cp "assets/icons/icon-${density}.png" "$target_dir/ic_launcher.png"
+            echo "  Copied icon to mipmap-${density}/ic_launcher.png"
+          done
+          
+          # 4. Also copy as webp for newer Android versions that prefer webp
+          for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            target_dir="android/app/src/main/res/mipmap-${density}"
+            if command -v cwebp &> /dev/null; then
+              cwebp -q 90 "$target_dir/ic_launcher.png" -o "$target_dir/ic_launcher.webp" 2>/dev/null || true
+            fi
+          done
+          
+          # 5. Update AndroidManifest to not use roundIcon (which can cause issues)
+          sed -i 's/android:roundIcon="@mipmap\/ic_launcher_round"//g' android/app/src/main/AndroidManifest.xml || true
+          
+          echo "=== Final icon files ==="
           find android/app/src/main/res -name "ic_launcher*" -type f | sort
+
+      - name: Update version
+        run: |
+          # Update versionName in AndroidManifest
+          sed -i 's/android:versionName="[^"]*"/android:versionName="0.6.0"/g' android/app/src/main/AndroidManifest.xml
+          # Update versionCode
+          sed -i 's/android:versionCode="[^"]*"/android:versionCode="6"/g' android/app/src/main/AndroidManifest.xml
+          echo "Updated version to 0.6.0 (code 6)"
+          grep -E "versionName|versionCode" android/app/src/main/AndroidManifest.xml
 
       - name: Build APK
         working-directory: android
@@ -62,3 +99,26 @@ jobs:
         with:
           name: confluence-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v0.6.0
+          name: Confluence v0.6.0
+          body: |
+            Confluence AI Hub - Android APK
+            
+            ### 更新内容
+            - 全新APP图标设计
+            - 修复图标显示问题
+            - 版本号统一为 v0.6.0
+            
+            ### 安装说明
+            1. 下载 APK 文件
+            2. 在 Android 手机上允许"安装未知来源应用"
+            3. 点击 APK 安装
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 // Current app version - bump this on each release
-const APP_VERSION = "0.5.2";
+const APP_VERSION = "0.6.0";
 const GITHUB_RELEASE_URL = "https://api.github.com/repos/dengxiaoshu948-afk/confluence/releases/latest";
 
 export default function Settings() {

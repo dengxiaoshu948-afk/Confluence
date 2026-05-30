@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/providers/theme"
 import App from './App.tsx'
 
 // Cache version - bump this on each release to force cache clear
-const APP_CACHE_VERSION = "0.5.0";
+const APP_CACHE_VERSION = "0.6.0";
 
 // Auto-clear cache on version change
 (async () => {
