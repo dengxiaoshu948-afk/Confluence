@@ -24,9 +24,6 @@ jobs:
           java-version: 21
           distribution: temurin
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
       - name: Install dependencies
         run: npm ci
 
@@ -36,8 +33,16 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Make gradlew executable
-        run: chmod +x android/gradlew
+      - name: Fix Gradle Wrapper
+        working-directory: android
+        run: |
+          # Remove corrupted wrapper and re-download
+          rm -f gradle/wrapper/gradle-wrapper.jar
+          curl -L --retry 3 --timeout 60 \
+            "https://raw.githubusercontent.com/gradle/gradle/v8.11.1/gradle/wrapper/gradle-wrapper.jar" \
+            -o gradle/wrapper/gradle-wrapper.jar
+          ls -la gradle/wrapper/gradle-wrapper.jar
+          chmod +x gradlew
 
       - name: Build APK
         working-directory: android
