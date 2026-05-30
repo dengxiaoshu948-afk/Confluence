@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams, useNavigate, useLocation } from "react-router";
 import { trpc } from "@/providers/trpc";
 import { useTheme } from "@/providers/theme";
 import {
@@ -25,7 +25,9 @@ const codeColor = "bg-rose-500/10 text-rose-400 border-rose-500/20";
 
 export default function Code() {
   const { isDark } = useTheme();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const lang = searchParams.get("lang") || "";
   const { data, isLoading } = trpc.resource.list.useQuery({
     type: "code",
@@ -81,7 +83,7 @@ export default function Code() {
               const params = new URLSearchParams(searchParams);
               if (l.key) params.set("lang", l.key);
               else params.delete("lang");
-              setSearchParams(params);
+              navigate(`${location.pathname}?${params.toString()}`, { replace: true });
             }}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
               lang === l.key

@@ -30,7 +30,7 @@ export default function Login() {
   const loginMutation = trpc.localAuth.login.useMutation({
     onSuccess: (data) => {
       localStorage.setItem("local_auth_token", data.token);
-      window.location.href = "/";
+      window.location.replace("/");
     },
     onError: (err) => setError(err.message),
   });
@@ -38,7 +38,7 @@ export default function Login() {
   const registerMutation = trpc.localAuth.register.useMutation({
     onSuccess: (data) => {
       localStorage.setItem("local_auth_token", data.token);
-      window.location.href = "/";
+      window.location.replace("/");
     },
     onError: (err) => setError(err.message),
   });

@@ -107,7 +107,7 @@ html:not(.dark) .glass-card:hover {
   font-weight: 500;
   font-size: 0.875rem;
   color: white;
-  background: linear-gradient(135deg, #3B82F6, #06B6D4);
+  background: linear-gradient(135deg, #2563EB, #06B6D4);
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -118,16 +118,21 @@ html:not(.dark) .glass-card:hover {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #06B6D4, #3B82F6);
+  background: linear-gradient(135deg, #06B6D4, #2563EB);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 .btn-primary:hover::before { opacity: 1; }
 .btn-primary:hover {
-  box-shadow: 0 0 24px rgba(59, 130, 246, 0.35);
+  box-shadow: 0 0 24px rgba(37, 99, 235, 0.4);
   transform: translateY(-1px);
 }
 .btn-primary > * { position: relative; z-index: 1; }
+.btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  filter: saturate(0.7);
+}
 
 .btn-secondary {
   display: inline-flex;
@@ -214,6 +219,22 @@ html:not(.dark) .pill-badge {
 @keyframes scanline {
   0% { transform: translateY(-100%); }
   100% { transform: translateY(500%); }
+}
+
+/* ===== Hide Kimi platform injected floating button ===== */
+[class*="kimi-agent"],
+[class*="kimi-fab"],
+[id*="kimi-agent"],
+[id*="kimi-fab"],
+[class*="KimiAgent"],
+[class*="floating-agent"],
+[aria-label*="Kimi Agent"],
+button[class*="agent"][class*="floating"],
+div[class*="agent"][class*="fixed"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* Ensure light mode text never goes invisible */

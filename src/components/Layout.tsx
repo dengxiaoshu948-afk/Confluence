@@ -74,13 +74,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="flex items-center justify-between h-14">
               {/* Logo */}
-              <Link to="/" className="flex items-center gap-2 shrink-0 group">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:shadow-lg ${
-                  isDark ? "bg-white/10 group-hover:bg-white/15" : "bg-slate-100 group-hover:bg-slate-200"
-                }`}>
-                  <Home size={16} className={location.pathname === "/" ? "text-blue-500" : isDark ? "text-gray-400" : "text-slate-500"} />
+              <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-sm shadow-blue-500/20">
+                  <span className="text-white text-xs font-bold">C</span>
                 </div>
-                <span className={`font-semibold text-sm tracking-tight transition-colors duration-300 ${isDark ? "text-white" : "text-slate-800"}`}>
+                <span className={`font-bold text-base tracking-tight transition-colors duration-300 bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent`}>
                   Confluence
                 </span>
               </Link>
@@ -159,7 +157,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Mobile Top Bar - minimal */}
-        <div className={`md:hidden fixed top-0 left-0 right-0 z-50 h-12 flex items-center justify-between px-4 ${
+        <div className={`md:hidden fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-4 ${
           isDark ? "bg-[#050507]/90 backdrop-blur-xl" : "bg-white/90 backdrop-blur-xl"
         }`} style={{ paddingTop: "env(safe-area-inset-top)" }}>
           <Link to="/" className="flex items-center gap-2">
