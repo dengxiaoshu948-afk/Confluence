@@ -6,22 +6,23 @@ import { ParticleBackground } from "./ParticleBackground";
 
 import {
   Search,
-  MessageSquare,
   User,
   LogIn,
   Home,
-  Compass,
-  Code2,
+  Upload,
+  Trophy,
   Bell,
+  X,
 } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 import { useState, useEffect, useRef } from "react";
 
-const navItems = [
+// Bottom nav items (5 slots: home / explore-search / upload / leaderboard / profile)
+const bottomNavItems = [
   { path: "/", label: "首页", icon: Home },
-  { path: "/explore", label: "探索", icon: Compass },
-  { path: "/code", label: "代码", icon: Code2 },
-  { path: "/community", label: "社区", icon: MessageSquare },
+  { path: "/explore", label: "发现", icon: Search },
+  { path: "/upload", label: "上传", icon: Upload },
+  { path: "/rank", label: "贡献", icon: Trophy },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -72,33 +73,38 @@ export function Layout({ children }: { children: React.ReactNode }) {
             : "border-b border-slate-200/50 bg-white/70 backdrop-blur-xl"
         }`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="flex items-center justify-between h-14">
-              {/* Logo */}
+            <div className="flex items-center justify-between h-16">
+              {/* Animated Logo */}
               <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-sm shadow-blue-500/20">
-                  <span className="text-white text-xs font-bold">C</span>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-sm shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </div>
-                <span className={`font-bold text-base tracking-tight transition-colors duration-300 bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent`}>
+                <span className="logo-text font-bold text-lg tracking-tight">
                   Confluence
                 </span>
               </Link>
 
               {/* Desktop Nav Links */}
               <div className="flex items-center gap-1">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
+                {[
+                  { path: "/", label: "首页" },
+                  { path: "/explore", label: "发现" },
+                  { path: "/code", label: "代码" },
+                  { path: "/community", label: "社区" },
+                ].map((item) => {
                   const isActive = location.pathname === item.path || (item.path !== "/" && location.pathname.startsWith(item.path));
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                         isActive
                           ? isDark ? "text-white bg-white/10" : "text-blue-600 bg-blue-50"
                           : isDark ? "text-gray-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
                       }`}
                     >
-                      <Icon size={16} />
                       {item.label}
                     </Link>
                   );
@@ -108,10 +114,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
               {/* Right Side */}
               <div className="flex items-center gap-2">
                 <ThemeToggle />
-                <Link to="/explore" className={`p-2 rounded-lg transition-all ${isDark ? "text-gray-400 hover:text-white hover:bg-white/5" : "text-slate-400 hover:text-slate-800 hover:bg-slate-100"}`}>
-                  <Search size={18} />
-                </Link>
-
                 {user && (
                   <div className="relative" ref={notifRef}>
                     <button onClick={() => setNotifOpen(!notifOpen)} className={`relative p-2 rounded-lg transition-all ${isDark ? "text-gray-400 hover:text-white hover:bg-white/5" : "text-slate-400 hover:text-slate-800 hover:bg-slate-100"}`}>
@@ -122,11 +124,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     </button>
                     {notifOpen && (
                       <div className={`absolute right-0 top-full mt-2 w-80 rounded-xl border shadow-xl z-50 overflow-hidden ${isDark ? "bg-[#121218] border-white/10" : "bg-white border-slate-200"}`}>
+                        {/* Notification header with close button */}
                         <div className={`flex items-center justify-between p-3 border-b ${isDark ? "border-white/5" : "border-slate-100"}`}>
                           <span className={`text-sm font-medium ${isDark ? "text-white" : "text-slate-800"}`}>通知</span>
-                          {unreadCount > 0 && (
-                            <button onClick={() => markAllRead.mutate(undefined, { onSuccess: () => { utils.notification.unreadCount.invalidate(); utils.notification.list.invalidate(); } })} className="text-xs text-blue-400 hover:text-blue-300">全部已读</button>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {unreadCount > 0 && (
+                              <button onClick={() => markAllRead.mutate(undefined, { onSuccess: () => { utils.notification.unreadCount.invalidate(); utils.notification.list.invalidate(); } })} className="text-xs text-blue-400 hover:text-blue-300">全部已读</button>
+                            )}
+                            <button
+                              onClick={() => setNotifOpen(false)}
+                              className={`p-1 rounded-md transition-colors ${isDark ? "text-gray-500 hover:text-white hover:bg-white/10" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"}`}
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
                         </div>
                         <div className="max-h-72 overflow-y-auto">
                           {notifications?.length ? notifications.map((n) => (
@@ -144,11 +155,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 {!isLoading && (
                   user ? (
                     <Link to="/profile" className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all ${isDark ? "hover:bg-white/5" : "hover:bg-slate-100"}`}>
-                      {user.avatar ? <img src={user.avatar} alt="" className="w-6 h-6 rounded-full object-cover" /> : <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center"><User size={14} className="text-blue-400" /></div>}
+                      {user.avatar ? <img src={user.avatar} alt="" className="w-7 h-7 rounded-full object-cover" /> : <div className="w-7 h-7 rounded-full bg-blue-500/20 flex items-center justify-center"><User size={14} className="text-blue-400" /></div>}
                       <span className={`text-sm max-w-[80px] truncate ${isDark ? "text-gray-300" : "text-slate-600"}`}>{user.name || "User"}</span>
                     </Link>
                   ) : (
-                    <Link to="/login" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 text-sm font-medium transition-all"><LogIn size={14} /><span>登录</span></Link>
+                    <Link to="/login" className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 text-sm font-medium transition-all"><LogIn size={14} /><span>登录</span></Link>
                   )
                 )}
               </div>
@@ -160,8 +171,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className={`md:hidden fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-4 ${
           isDark ? "bg-[#050507]/90 backdrop-blur-xl" : "bg-white/90 backdrop-blur-xl"
         }`} style={{ paddingTop: "env(safe-area-inset-top)" }}>
-          <Link to="/" className="flex items-center gap-2">
-            <span className={`font-semibold text-sm ${isDark ? "text-white" : "text-slate-800"}`}>Confluence</span>
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-white">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <span className={`font-bold text-sm tracking-tight logo-text`}>Confluence</span>
           </Link>
           <div className="flex items-center gap-1">
             <ThemeToggle />
@@ -173,8 +189,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </button>
                 {notifOpen && (
                   <div className={`absolute right-0 top-full mt-2 w-72 rounded-xl border shadow-xl z-50 overflow-hidden ${isDark ? "bg-[#121218] border-white/10" : "bg-white border-slate-200"}`}>
-                    <div className={`p-3 border-b ${isDark ? "border-white/5" : "border-slate-100"}`}>
+                    <div className={`flex items-center justify-between p-3 border-b ${isDark ? "border-white/5" : "border-slate-100"}`}>
                       <span className={`text-sm font-medium ${isDark ? "text-white" : "text-slate-800"}`}>通知</span>
+                      <div className="flex items-center gap-2">
+                        {unreadCount > 0 && (
+                          <button onClick={() => { markAllRead.mutate(undefined, { onSuccess: () => { utils.notification.unreadCount.invalidate(); utils.notification.list.invalidate(); } } ); }} className="text-xs text-blue-400">全部已读</button>
+                        )}
+                        <button onClick={() => setNotifOpen(false)} className={`p-1 rounded ${isDark ? "text-gray-500" : "text-slate-400"}`}><X size={14} /></button>
+                      </div>
                     </div>
                     <div className="max-h-64 overflow-y-auto">
                       {notifications?.length ? notifications.map((n) => (
@@ -207,29 +229,43 @@ export function Layout({ children }: { children: React.ReactNode }) {
             : "border-slate-200/50 bg-white/95 backdrop-blur-xl"
         }`} style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
           <div className="flex items-center justify-around h-14">
-            {navItems.map((item) => {
+            {bottomNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path || (item.path !== "/" && location.pathname.startsWith(item.path));
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex flex-col items-center justify-center gap-0.5 w-16 h-full transition-all duration-300 ${
+                  replace={true}
+                  className={`flex flex-col items-center justify-center gap-0.5 w-14 h-full transition-all duration-300 relative ${
                     isActive
                       ? isDark ? "text-blue-400" : "text-blue-600"
                       : isDark ? "text-gray-500" : "text-slate-400"
                   }`}
                 >
-                  <Icon size={20} className={isActive ? "drop-shadow-[0_0_6px_rgba(59,130,246,0.5)]" : ""} />
-                  <span className="text-[10px] font-medium">{item.label}</span>
-                  {isActive && <span className={`absolute bottom-1.5 w-5 h-0.5 rounded-full ${isDark ? "bg-blue-400" : "bg-blue-500"}`} />}
+                  {item.path === "/upload" ? (
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center -mt-4 shadow-lg ${
+                      isActive
+                        ? "bg-gradient-to-br from-blue-500 to-cyan-400 text-white shadow-blue-500/30"
+                        : isDark ? "bg-slate-700 text-gray-300" : "bg-slate-200 text-slate-500"
+                    }`}>
+                      <Icon size={20} />
+                    </div>
+                  ) : (
+                    <>
+                      <Icon size={20} className={isActive ? "drop-shadow-[0_0_6px_rgba(59,130,246,0.5)]" : ""} />
+                      <span className="text-[10px] font-medium">{item.label}</span>
+                    </>
+                  )}
+                  {isActive && item.path !== "/upload" && <span className={`absolute bottom-1 w-4 h-0.5 rounded-full ${isDark ? "bg-blue-400" : "bg-blue-500"}`} />}
                 </Link>
               );
             })}
-            {/* Profile tab on bottom nav */}
+            {/* Profile tab */}
             <Link
               to="/profile"
-              className={`flex flex-col items-center justify-center gap-0.5 w-16 h-full transition-all duration-300 ${
+              replace={true}
+              className={`flex flex-col items-center justify-center gap-0.5 w-14 h-full transition-all duration-300 relative ${
                 location.pathname === "/profile"
                   ? isDark ? "text-blue-400" : "text-blue-600"
                   : isDark ? "text-gray-500" : "text-slate-400"
@@ -237,7 +273,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             >
               {user?.avatar ? <img src={user.avatar} alt="" className="w-5 h-5 rounded-full" /> : <User size={20} />}
               <span className="text-[10px] font-medium">我的</span>
-              {location.pathname === "/profile" && <span className={`absolute bottom-1.5 w-5 h-0.5 rounded-full ${isDark ? "bg-blue-400" : "bg-blue-500"}`} />}
+              {location.pathname === "/profile" && <span className={`absolute bottom-1 w-4 h-0.5 rounded-full ${isDark ? "bg-blue-400" : "bg-blue-500"}`} />}
             </Link>
           </div>
         </nav>

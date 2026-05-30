@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { trpc } from "@/providers/trpc";
 import {
@@ -6,25 +7,48 @@ import {
   Clock,
   Plus,
   Loader2,
+  Search,
 } from "lucide-react";
 
 const hotTags = ["大模型", "Stable Diffusion", "LangChain", "PyTorch", "GPT", "微调", "部署"];
 
 export default function Community() {
+  const [searchQuery, setSearchQuery] = useState("");
   const { data, isLoading } = trpc.discussion.list.useQuery({ limit: 50 });
 
+  // Client-side search filter
+  const items = data?.items.filter((item) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return item.title.toLowerCase().includes(q) ||
+           item.content.toLowerCase().includes(q) ||
+           item.tags?.toLowerCase().includes(q);
+  }) || [];
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-2">社区讨论</h1>
-          <p className="text-gray-400 text-sm">与 AI 开发者交流技术、分享经验、解决问题</p>
+    <div className="space-y-4 relative z-10">
+      {/* Sticky Header with Search */}
+      <div className="sticky top-0 z-30 -mx-4 px-4 py-3 bg-inherit">
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-xl font-bold text-white">社区</h1>
+          <Link to="/discussion/new" className="btn-primary text-xs px-3 py-1.5">
+            <Plus size={14} />
+            发起讨论
+          </Link>
         </div>
-        <Link to="/discussion/new" className="btn-primary self-start">
-          <Plus size={16} />
-          发起讨论
-        </Link>
+        <p className="text-xs text-gray-500 mb-3">交流技术、分享经验</p>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+          <input
+            type="text"
+            placeholder="搜索讨论..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-all"
+          />
+        </div>
       </div>
 
       {/* Hot Tags */}
@@ -32,6 +56,7 @@ export default function Community() {
         {hotTags.map((tag) => (
           <span
             key={tag}
+            onClick={() => setSearchQuery(tag)}
             className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-xs font-medium hover:bg-white/10 hover:text-white transition-all cursor-pointer"
           >
             {tag}
@@ -46,7 +71,7 @@ export default function Community() {
         </div>
       ) : (
         <div className="space-y-3">
-          {data?.items.map((discussion) => (
+          {items.map((discussion) => (
             <Link
               key={discussion.id}
               to={`/discussion/${discussion.id}`}
@@ -113,15 +138,19 @@ export default function Community() {
             </Link>
           ))}
 
-          {data?.items.length === 0 && (
+          {items.length === 0 && (
             <div className="text-center py-20">
               <MessageSquare size={48} className="text-gray-700 mx-auto mb-4" />
               <div className="text-gray-500 text-lg mb-2">暂无讨论</div>
-              <p className="text-gray-600 text-sm mb-6">成为第一个发起讨论的人吧！</p>
-              <Link to="/discussion/new" className="btn-primary">
-                <Plus size={16} />
-                发起讨论
-              </Link>
+              <p className="text-gray-600 text-sm mb-6">
+                {searchQuery ? "没有找到匹配的讨论" : "成为第一个发起讨论的人吧！"}
+              </p>
+              {!searchQuery && (
+                <Link to="/discussion/new" className="btn-primary">
+                  <Plus size={16} />
+                  发起讨论
+                </Link>
+              )}
             </div>
           )}
         </div>

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { trpc } from "@/providers/trpc";
 import { HeroCanvas } from "@/components/HeroCanvas";
-import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import {
   ArrowRight,
   Download,
@@ -18,16 +17,10 @@ import {
   Code2,
   Hash,
   Trophy,
-  Compass,
+  Search,
   Users,
-  Flame,
-  Sparkles,
   ArrowUpRight,
   Radio,
-  Crown,
-  Medal,
-  Award,
-  TrendingUp,
 } from "lucide-react";
 
 const typeIcons: Record<string, React.ReactNode> = {
@@ -75,19 +68,10 @@ function TiltCard({ children, className }: { children: React.ReactNode; classNam
   );
 }
 
-// Contributor rank icon
-function RankIcon({ rank }: { rank: number }) {
-  if (rank === 0) return <Crown size={16} className="text-amber-400" />;
-  if (rank === 1) return <Medal size={16} className="text-slate-300" />;
-  if (rank === 2) return <Award size={16} className="text-amber-600" />;
-  return <span className="text-xs font-mono text-slate-500 w-4 text-center">{rank + 1}</span>;
-}
-
 export default function Home() {
   const { data: latestResources } = trpc.resource.list.useQuery({ sort: "newest", limit: 6 });
   const { data: popularResources } = trpc.resource.list.useQuery({ sort: "popular", limit: 6 });
   const { data: discussionsData } = trpc.discussion.list.useQuery({ limit: 5 });
-  const { data: leaderboard } = trpc.points.leaderboard.useQuery({ limit: 5 });
 
   return (
     <div className="space-y-16 relative z-10">
@@ -107,8 +91,8 @@ export default function Home() {
             <span className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               style={{ background: "radial-gradient(circle at 50% 50%, rgba(100,200,255,0.25), transparent 60%)" }} />
             <span className="relative z-10 flex items-center gap-2 text-sm">
-              <Compass size={16} className="group-hover:rotate-45 transition-transform duration-500" />
-              探索
+              <Search size={16} />
+              搜索
             </span>
           </Link>
           <Link
@@ -122,16 +106,12 @@ export default function Home() {
             <span className="relative z-10 flex items-center gap-2 text-sm">
               <Users size={16} />
               社区
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             </span>
           </Link>
         </div>
       </section>
 
-      {/* ===== PWA INSTALL PROMPT ===== */}
-      <PWAInstallPrompt />
-
-      {/* ===== CATEGORY CARDS (Compact) ===== */}
+      {/* ===== CATEGORY CARDS ===== */}
       <section>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {[
@@ -157,88 +137,48 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== POPULAR + LEADERBOARD (Side by Side) ===== */}
-      <section className="grid grid-cols-1 lg:grid-cols-4 gap-5">
-        {/* Popular Resources - takes 3/4 */}
-        <div className="lg:col-span-3 space-y-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Sparkles size={16} className="text-blue-400" />
-              </div>
-              <h2 className="text-lg font-semibold text-slate-800 dark:text-white">热门资源</h2>
+      {/* ===== POPULAR RESOURCES ===== */}
+      <section>
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <Trophy size={16} className="text-blue-400" />
             </div>
-            <Link to="/explore?sort=popular" className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors">
-              全部 <ArrowUpRight size={14} />
-            </Link>
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-white">热门资源</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {popularResources?.items.map((r) => (
-              <Link key={r.id} to={`/resource/${r.id}`} className="block">
-                <TiltCard className="glass-card p-5 group cursor-pointer h-full">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${categoryColors[r.type] || categoryColors.doc}`}>
-                          {typeIcons[r.type]}
-                          {typeLabels[r.type] || r.type}
-                        </span>
-                        <span className="text-xs text-slate-400 dark:text-gray-600">{r.category}</span>
-                      </div>
-                      <h3 className="font-medium truncate group-hover:text-blue-400 transition-colors text-slate-800 dark:text-white">{r.title}</h3>
-                      <p className="text-sm mt-1 line-clamp-2 text-slate-500 dark:text-gray-500">{r.description}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100 dark:border-white/5 text-xs text-slate-400 dark:text-gray-500">
-                    <span className="flex items-center gap-1"><Download size={12} />{r.downloadCount}</span>
-                    <span className="flex items-center gap-1"><Star size={12} />{r.starCount}</span>
-                    <span className="flex items-center gap-1"><Clock size={12} />{new Date(r.createdAt).toLocaleDateString("zh-CN")}</span>
-                  </div>
-                </TiltCard>
-              </Link>
-            ))}
-          </div>
+          <Link to="/explore?sort=popular" className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors">
+            全部 <ArrowUpRight size={14} />
+          </Link>
         </div>
-
-        {/* Leaderboard - takes 1/4 */}
-        <div className="glass-card p-5 h-fit">
-          <div className="flex items-center gap-2 mb-5">
-            <Trophy size={18} className="text-amber-400" />
-            <h2 className="text-base font-semibold text-slate-800 dark:text-white">贡献榜</h2>
-          </div>
-          <div className="space-y-3">
-            {leaderboard?.map((user, idx) => (
-              <div key={user.id} className="flex items-center gap-3">
-                <div className="shrink-0 w-5 flex justify-center">
-                  <RankIcon rank={idx} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {popularResources?.items.map((r) => (
+            <Link key={r.id} to={`/resource/${r.id}`} className="block">
+              <TiltCard className="glass-card p-5 group cursor-pointer h-full">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${categoryColors[r.type] || categoryColors.doc}`}>
+                        {typeIcons[r.type]}
+                        {typeLabels[r.type] || r.type}
+                      </span>
+                      <span className="text-xs text-slate-400 dark:text-gray-600">{r.category}</span>
+                    </div>
+                    <h3 className="font-medium truncate group-hover:text-blue-400 transition-colors text-slate-800 dark:text-white">{r.title}</h3>
+                    <p className="text-sm mt-1 line-clamp-2 text-slate-500 dark:text-gray-500">{r.description}</p>
+                  </div>
                 </div>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${
-                  idx === 0 ? "bg-gradient-to-br from-amber-400 to-orange-500" :
-                  idx === 1 ? "bg-gradient-to-br from-slate-300 to-slate-400" :
-                  idx === 2 ? "bg-gradient-to-br from-amber-600 to-amber-700" :
-                  "bg-gradient-to-br from-blue-500 to-cyan-500"
-                }`}>
-                  {(user.name || "U").charAt(0).toUpperCase()}
+                <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100 dark:border-white/5 text-xs text-slate-400 dark:text-gray-500">
+                  <span className="flex items-center gap-1"><Download size={12} />{r.downloadCount}</span>
+                  <span className="flex items-center gap-1"><Star size={12} />{r.starCount}</span>
+                  <span className="flex items-center gap-1"><Clock size={12} />{new Date(r.createdAt).toLocaleDateString("zh-CN")}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-slate-700 dark:text-white truncate">{user.name || "匿名"}</div>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-amber-500 font-medium shrink-0">
-                  <TrendingUp size={10} />
-                  {user.points}
-                </div>
-              </div>
-            ))}
-            {(!leaderboard || leaderboard.length === 0) && (
-              <div className="text-center text-xs text-slate-400 dark:text-gray-500 py-4">
-                暂无数据
-              </div>
-            )}
-          </div>
+              </TiltCard>
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* ===== COMMUNITY (Compact 3-col) ===== */}
+      {/* ===== COMMUNITY ===== */}
       <section>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
@@ -274,35 +214,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== TAG CLOUD (Compact row) ===== */}
-      <section className="glass-card p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <Flame size={16} className="text-orange-400" />
-          <h2 className="text-sm font-semibold text-slate-800 dark:text-white">热门话题</h2>
-        </div>
-        <div className="flex flex-wrap gap-x-4 gap-y-2 items-baseline">
-          {[
-            { label: "大模型", size: "text-lg", color: "text-blue-500 dark:text-blue-400", href: "/explore?search=大模型" },
-            { label: "PyTorch", size: "text-sm", color: "text-orange-500 dark:text-orange-400", href: "/explore?search=PyTorch" },
-            { label: "微调", size: "text-base", color: "text-purple-500 dark:text-purple-400", href: "/explore?search=微调" },
-            { label: "部署", size: "text-sm", color: "text-emerald-500 dark:text-emerald-400", href: "/explore?search=部署" },
-            { label: "GPT", size: "text-lg", color: "text-cyan-500 dark:text-cyan-400", href: "/explore?search=GPT" },
-            { label: "Stable Diffusion", size: "text-xs", color: "text-pink-500 dark:text-pink-400", href: "/explore?search=Stable+Diffusion" },
-            { label: "LangChain", size: "text-sm", color: "text-indigo-500 dark:text-indigo-400", href: "/explore?search=LangChain" },
-            { label: "数据集", size: "text-base", color: "text-teal-500 dark:text-teal-400", href: "/explore?type=dataset" },
-            { label: "Transformer", size: "text-sm", color: "text-violet-500 dark:text-violet-400", href: "/explore?search=Transformer" },
-            { label: "推理加速", size: "text-xs", color: "text-amber-500 dark:text-amber-400", href: "/explore?search=推理加速" },
-            { label: "RAG", size: "text-base", color: "text-rose-500 dark:text-rose-400", href: "/explore?search=RAG" },
-            { label: "代码", size: "text-sm", color: "text-sky-500 dark:text-sky-400", href: "/code" },
-          ].map((tag) => (
-            <Link key={tag.label} to={tag.href} className={`${tag.size} font-medium transition-all duration-300 hover:scale-110 hover:underline underline-offset-4 decoration-blue-400/50 ${tag.color}`}>
-              #{tag.label}
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ===== LATEST (Compact grid) ===== */}
+      {/* ===== LATEST ===== */}
       <section>
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-semibold flex items-center gap-2 text-slate-800 dark:text-white">

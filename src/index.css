@@ -221,6 +221,20 @@ html:not(.dark) .pill-badge {
   100% { transform: translateY(500%); }
 }
 
+/* ===== Animated Logo Text ===== */
+.logo-text {
+  background: linear-gradient(90deg, #3B82F6, #06B6D4, #8B5CF6, #3B82F6);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: logoShimmer 4s ease-in-out infinite;
+}
+@keyframes logoShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
 /* ===== Hide Kimi platform injected floating button ===== */
 [class*="kimi-agent"],
 [class*="kimi-fab"],

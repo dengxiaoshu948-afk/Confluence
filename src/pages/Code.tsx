@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useSearchParams, useNavigate, useLocation } from "react-router";
 import { trpc } from "@/providers/trpc";
 import { useTheme } from "@/providers/theme";
@@ -8,6 +9,7 @@ import {
   Download,
   Terminal,
   Zap,
+  Search,
 } from "lucide-react";
 
 const languages = [
@@ -28,51 +30,52 @@ export default function Code() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
   const lang = searchParams.get("lang") || "";
   const { data, isLoading } = trpc.resource.list.useQuery({
     type: "code",
     limit: 48,
   });
 
-  // Client-side filter by language tag
+  // Client-side filter by language tag and search query
   const items = data?.items.filter((item) => {
-    if (!lang) return true;
-    return item.tags?.toLowerCase().includes(lang.toLowerCase());
+    if (!lang && !searchQuery) return true;
+    const matchesLang = !lang || item.tags?.toLowerCase().includes(lang.toLowerCase());
+    const matchesSearch = !searchQuery || 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesLang && matchesSearch;
   }) || [];
 
   return (
     <div className="space-y-6 relative z-10">
-      {/* Hero Header */}
-      <section className={`relative rounded-2xl overflow-hidden p-8 md:p-10 ${
-        isDark
-          ? "bg-gradient-to-br from-[#0c1222] to-[#080c18] border border-white/5"
-          : "bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100"
-      }`}>
-        <div className="absolute top-0 right-0 w-60 h-60 opacity-20 pointer-events-none">
-          <div className="w-full h-full rounded-full" style={{
-            background: isDark
-              ? "radial-gradient(circle, rgba(244,63,94,0.3) 0%, transparent 70%)"
-              : "radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%)",
-            filter: "blur(60px)"
-          }} />
+      {/* Sticky Header with Search */}
+      <div className="sticky top-0 z-30 -mx-4 px-4 py-3 bg-inherit">
+        <div className="flex items-center gap-2 mb-1">
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-medium border ${codeColor}`}>
+            <Code2 size={12} />
+            开源代码
+          </span>
         </div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-3">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${codeColor}`}>
-              <Code2 size={13} />
-              开源代码
-            </span>
-          </div>
-          <h1 className={`text-2xl md:text-3xl font-bold tracking-tight mb-3 transition-colors ${
-            isDark ? "text-white" : "text-slate-800"
-          }`}>
-            代码与开源项目
-          </h1>
-          <p className={`text-base max-w-xl transition-colors ${isDark ? "text-gray-400" : "text-slate-500"}`}>
-            发现优秀的 AI 开源代码项目 — 训练脚本、推理引擎、数据处理管道、部署工具等。代码不同于模型权重，是可以阅读、修改和复用的工程资产。
-          </p>
+        <h1 className={`text-lg font-bold mb-1 ${isDark ? "text-white" : "text-slate-800"}`}>
+          代码库
+        </h1>
+        <p className={`text-xs mb-3 ${isDark ? "text-gray-500" : "text-slate-400"}`}>
+          训练脚本、推理引擎与开发工具
+        </p>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+          <input
+            type="text"
+            placeholder="搜索代码..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-all"
+          />
         </div>
-      </section>
+      </div>
 
       {/* Language Filter */}
       <div className={`flex flex-wrap gap-2 pb-4 border-b ${isDark ? "border-white/5" : "border-slate-200"}`}>

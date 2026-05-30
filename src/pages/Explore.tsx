@@ -88,35 +88,35 @@ export default function Explore() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white mb-2">探索资源</h1>
-        <p className="text-gray-400 text-sm">浏览社区贡献的 AI 模型、数据集、工具和教程</p>
-      </div>
+      <div className="sticky top-0 z-30 -mx-4 px-4 py-3 bg-inherit">
+        <h1 className="text-xl font-bold text-slate-800 dark:text-white mb-1">发现</h1>
+        <p className="text-xs text-slate-400 dark:text-gray-500">探索 AI 模型、数据集与工具</p>
 
-      {/* Search Bar */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-          <input
-            type="text"
-            placeholder="搜索资源..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all"
-          />
+        {/* Search Bar */}
+        <div className="flex items-center gap-3 mt-3">
+          <div className="flex-1 relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            <input
+              type="text"
+              placeholder="搜索资源..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all"
+            />
+          </div>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`p-2.5 rounded-xl border transition-all ${
+              showFilters
+                ? "bg-blue-500/10 border-blue-500/30 text-blue-400"
+                : "bg-white/5 border-white/10 text-gray-400 hover:text-white"
+            }`}
+          >
+            <Filter size={16} />
+          </button>
         </div>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`p-2.5 rounded-xl border transition-all ${
-            showFilters
-              ? "bg-blue-500/10 border-blue-500/30 text-blue-400"
-              : "bg-white/5 border-white/10 text-gray-400 hover:text-white"
-          }`}
-        >
-          <Filter size={16} />
-        </button>
       </div>
 
       {/* Filters */}

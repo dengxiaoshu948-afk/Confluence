@@ -10,6 +10,8 @@ import Community from "./pages/Community";
 import DiscussionDetail from "./pages/DiscussionDetail";
 import NewDiscussion from "./pages/NewDiscussion";
 import Profile from "./pages/Profile";
+import ProfileDetail from "./pages/ProfileDetail";
+import Rank from "./pages/Rank";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -62,6 +64,8 @@ export default function App() {
         <Route path="/discussion/:id" element={<DiscussionDetail />} />
         <Route path="/discussion/new" element={<NewDiscussion />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/:type" element={<ProfileDetail />} />
+        <Route path="/rank" element={<Rank />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<NotFound />} />
