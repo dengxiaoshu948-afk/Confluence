@@ -6,6 +6,8 @@ const config: CapacitorConfig = {
   webDir: "dist/public",
   server: {
     androidScheme: "https",
+    url: "https://vrkswoeg6jemc.kimi.site/",
+    cleartext: false,
   },
   android: {
     buildOptions: {
