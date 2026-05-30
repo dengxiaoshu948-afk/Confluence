@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { Link } from "react-router";
@@ -11,7 +11,15 @@ import {
   Loader2,
   Shield,
   Check,
+  Download,
+  Trash2,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
+
+// Current app version - bump this on each release
+const APP_VERSION = "0.5.0";
+const GITHUB_RELEASE_URL = "https://api.github.com/repos/dengxiaoshu948-afk/confluence/releases/latest";
 
 export default function Settings() {
   const { user, isLoading: authLoading, refresh } = useAuth();
@@ -20,6 +28,77 @@ export default function Settings() {
   const [avatar, setAvatar] = useState(user?.avatar || "");
   const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Update check states
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState<{
+    hasUpdate: boolean;
+    latestVersion: string;
+    downloadUrl: string;
+  } | null>(null);
+  const [clearingCache, setClearingCache] = useState(false);
+  const [cacheCleared, setCacheCleared] = useState(false);
+
+  // Check for updates on mount
+  useEffect(() => {
+    checkUpdate();
+  }, []);
+
+  const checkUpdate = async () => {
+    setCheckingUpdate(true);
+    try {
+      const response = await fetch(GITHUB_RELEASE_URL);
+      if (response.ok) {
+        const data = await response.json();
+        const latestVersion = data.tag_name?.replace("v", "") || "0.0.0";
+        const downloadUrl = data.assets?.[0]?.browser_download_url || "";
+
+        // Compare versions
+        const currentParts = APP_VERSION.split(".").map(Number);
+        const latestParts = latestVersion.split(".").map(Number);
+        let hasUpdate = false;
+        for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
+          const current = currentParts[i] || 0;
+          const latest = latestParts[i] || 0;
+          if (latest > current) {
+            hasUpdate = true;
+            break;
+          }
+          if (latest < current) break;
+        }
+
+        setUpdateInfo({ hasUpdate, latestVersion, downloadUrl });
+      }
+    } catch {
+      // Silently fail - user can manually check
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
+
+  const clearCache = async () => {
+    setClearingCache(true);
+    try {
+      // Clear service worker cache
+      if ("caches" in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      }
+      // Unregister service worker
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((r) => r.unregister()));
+      }
+      // Clear localStorage cache version
+      localStorage.removeItem("app_cache_version");
+      setCacheCleared(true);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch {
+      setClearingCache(false);
+    }
+  };
 
   const updateProfile = trpc.localAuth.updateProfile.useMutation({
     onSuccess: () => {
@@ -207,6 +286,75 @@ export default function Settings() {
             </button>
           )}
         </form>
+
+        {/* Version & Update Section */}
+        <div className="mt-8 pt-6 border-t border-slate-100 dark:border-white/5 space-y-4">
+          <h3 className="text-sm font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider">
+            应用管理
+          </h3>
+
+          {/* Current Version */}
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-slate-600 dark:text-gray-300">当前版本</span>
+            <span className="text-sm font-mono text-slate-400 dark:text-gray-500">v{APP_VERSION}</span>
+          </div>
+
+          {/* Check Update */}
+          <div>
+            {checkingUpdate ? (
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <Loader2 size={14} className="animate-spin" />
+                检查更新中...
+              </div>
+            ) : updateInfo?.hasUpdate ? (
+              <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle size={16} className="text-blue-400" />
+                  <span className="text-sm font-medium text-slate-800 dark:text-white">发现新版本</span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-gray-400 mb-3">
+                  最新版本：v{updateInfo.latestVersion}（当前：v{APP_VERSION}）
+                </p>
+                <a
+                  href={updateInfo.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary text-xs w-full"
+                >
+                  <Download size={14} />
+                  立即下载更新
+                </a>
+              </div>
+            ) : (
+              <button
+                onClick={checkUpdate}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-white/5 text-sm text-slate-600 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-all"
+              >
+                <RefreshCw size={14} />
+                检查更新
+              </button>
+            )}
+          </div>
+
+          {/* Clear Cache */}
+          <button
+            onClick={clearCache}
+            disabled={clearingCache}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-white/5 text-sm text-slate-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 transition-all disabled:opacity-50"
+          >
+            {clearingCache ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                {cacheCleared ? "已清理，刷新中..." : "清理中..."}
+              </>
+            ) : (
+              <>
+                <Trash2 size={14} />
+                清除缓存
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

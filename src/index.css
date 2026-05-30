@@ -236,19 +236,26 @@ html:not(.dark) .pill-badge {
 }
 
 /* ===== Hide Kimi platform injected floating button ===== */
-[class*="kimi-agent"],
-[class*="kimi-fab"],
-[id*="kimi-agent"],
-[id*="kimi-fab"],
-[class*="KimiAgent"],
-[class*="floating-agent"],
-[aria-label*="Kimi Agent"],
-button[class*="agent"][class*="floating"],
-div[class*="agent"][class*="fixed"] {
+[class*="kimi"],
+[class*="Kimi"],
+[id*="kimi"],
+[id*="Kimi"],
+[class*="agent"][class*="floating"],
+[class*="agent"][class*="fixed"],
+[class*="fab"][class*="agent"],
+[class*="float"][class*="button"],
+[aria-label*="Kimi"],
+[aria-label*="agent"],
+button[class*="agent"],
+div[class*="agent"][style*="fixed"],
+div[class*="agent"][style*="position: fixed"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }
 
 /* Ensure light mode text never goes invisible */
