@@ -24,8 +24,8 @@ jobs:
           java-version: 17
           distribution: temurin
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Install dependencies
         run: npm ci
@@ -36,15 +36,15 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Build APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
 
-      - name: Upload APK to releases
+      - name: Build APK with Gradle
+        working-directory: android
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: confluence-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30
