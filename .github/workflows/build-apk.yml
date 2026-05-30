@@ -83,12 +83,11 @@ jobs:
 
       - name: Update version
         run: |
-          # Update versionName in AndroidManifest
-          sed -i 's/android:versionName="[^"]*"/android:versionName="0.6.0"/g' android/app/src/main/AndroidManifest.xml
-          # Update versionCode
-          sed -i 's/android:versionCode="[^"]*"/android:versionCode="6"/g' android/app/src/main/AndroidManifest.xml
+          # Update versionName and versionCode in build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "0.6.0"/g' android/app/build.gradle
+          sed -i 's/versionCode [0-9]*/versionCode 6/g' android/app/build.gradle
           echo "Updated version to 0.6.0 (code 6)"
-          grep -E "versionName|versionCode" android/app/src/main/AndroidManifest.xml
+          grep -E "versionName|versionCode" android/app/build.gradle
 
       - name: Build APK
         working-directory: android
