@@ -1,0 +1,25 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependencies (这个最大，不用推)
+node_modules
+
+# Build outputs (自动生成的，不用推)
+dist/
+dist-ssr/
+build/
+*.local
+
+# Environment (敏感信息，不能推)
+.env
+.env.local
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
+
+# Cache
+*.tsbuildinfo

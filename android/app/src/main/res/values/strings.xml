@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Confluence AI Hub</string>
+    <string name="title_activity_main">Confluence AI Hub</string>
+    <string name="package_name">com.confluence.aihub</string>
+    <string name="custom_url_scheme">com.confluence.aihub</string>
+</resources>
