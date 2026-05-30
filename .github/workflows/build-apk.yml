@@ -38,7 +38,22 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Build APK with system Gradle
+      - name: Force clean old icon files
+        run: |
+          # Remove ANY XML-based adaptive/legacy icons that could override PNGs
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
+          rm -f android/app/src/main/res/drawable/ic_launcher_background.xml
+          rm -f android/app/src/main/res/drawable/ic_launcher_foreground.xml
+          rm -f android/app/src/main/res/drawable-v24/ic_launcher_background.xml
+          rm -f android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml
+          rm -f android/app/src/main/res/values/ic_launcher_background.xml
+          echo "Cleaned old XML icons"
+          
+          # Verify only PNG icons remain
+          echo "Remaining launcher icons:"
+          find android/app/src/main/res -name "ic_launcher*" -type f | sort
+
+      - name: Build APK
         working-directory: android
         run: gradle assembleDebug --stacktrace
 
