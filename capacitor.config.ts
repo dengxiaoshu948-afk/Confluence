@@ -2,7 +2,7 @@ import { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.confluence.aihub",
-  appName: "Confluence AI Hub",
+  appName: "Confluence",
   webDir: "dist/public",
   server: {
     androidScheme: "https",

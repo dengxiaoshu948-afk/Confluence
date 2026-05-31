@@ -18,14 +18,14 @@ export function ThemeToggle() {
       }}
       title={isDark ? "切换亮色模式" : "切换暗色模式"}
     >
-      {/* Glow effect - contained within button */}
+      {/* Glow effect - larger and more visible */}
       <div
         className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         style={{
           background: isDark
-            ? "radial-gradient(circle at center, rgba(59,130,246,0.25), transparent 60%)"
-            : "radial-gradient(circle at center, rgba(245,158,11,0.25), transparent 60%)",
-          transform: "scale(0.85)",
+            ? "radial-gradient(circle at center, rgba(59,130,246,0.4), transparent 70%)"
+            : "radial-gradient(circle at center, rgba(245,158,11,0.4), transparent 70%)",
+          transform: "scale(1.2)",
         }}
       />
       {isDark ? (

@@ -228,7 +228,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             ? "border-white/5 bg-[#050507]/95 backdrop-blur-xl"
             : "border-slate-200/50 bg-white/95 backdrop-blur-xl"
         }`} style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-          <div className="flex items-center justify-around h-14">
+          <div className="flex items-center justify-around h-16">
             {bottomNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path || (item.path !== "/" && location.pathname.startsWith(item.path));
@@ -237,7 +237,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   key={item.path}
                   to={item.path}
                   replace={true}
-                  className={`flex flex-col items-center justify-center gap-0.5 w-14 h-full transition-all duration-300 relative ${
+                  className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-300 relative ${
                     isActive
                       ? isDark ? "text-blue-400" : "text-blue-600"
                       : isDark ? "text-gray-500" : "text-slate-400"
@@ -265,7 +265,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Link
               to="/profile"
               replace={true}
-              className={`flex flex-col items-center justify-center gap-0.5 w-14 h-full transition-all duration-300 relative ${
+              className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-300 relative ${
                 location.pathname === "/profile"
                   ? isDark ? "text-blue-400" : "text-blue-600"
                   : isDark ? "text-gray-500" : "text-slate-400"

@@ -88,8 +88,8 @@ export async function uploadLargeFile(
 
 /**
  * Check if a file should use chunked upload
- * Files > 1GB use chunked upload
+ * Files > 10MB use chunked upload for reliability
  */
 export function shouldUseChunkedUpload(fileSize: number): boolean {
-  return fileSize > 1024 * 1024 * 1024; // > 1GB
+  return fileSize > 10 * 1024 * 1024; // > 10MB
 }

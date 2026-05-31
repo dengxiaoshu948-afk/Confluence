@@ -138,12 +138,21 @@ export default function ResourceDetail() {
   const handleDownload = () => {
     if (resource?.fileUrl) {
       incrementDownload.mutate({ id: resourceId });
-      const a = document.createElement("a");
-      a.href = `${resource.fileUrl}?download=1`;
-      a.download = resource.fileName || "download";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const downloadUrl = `${resource.fileUrl}?download=1`;
+      // APP WebView: use window.open for better compatibility
+      // Browser: use anchor download for better UX
+      const isInAppWebView = /Capacitor|WebView|wv/.test(navigator.userAgent);
+      if (isInAppWebView) {
+        window.open(downloadUrl, "_blank");
+      } else {
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        a.download = resource.fileName || "download";
+        a.target = "_blank";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
     }
   };
 
