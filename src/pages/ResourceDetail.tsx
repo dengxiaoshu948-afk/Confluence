@@ -135,24 +135,38 @@ export default function ResourceDetail() {
     },
   });
 
-  const handleDownload = () => {
-    if (resource?.fileUrl) {
-      incrementDownload.mutate({ id: resourceId });
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!resource?.fileUrl || downloading) return;
+    
+    incrementDownload.mutate({ id: resourceId });
+    setDownloading(true);
+    
+    try {
       const downloadUrl = `${resource.fileUrl}?download=1`;
-      // APP WebView: use window.open for better compatibility
-      // Browser: use anchor download for better UX
-      const isInAppWebView = /Capacitor|WebView|wv/.test(navigator.userAgent);
-      if (isInAppWebView) {
-        window.open(downloadUrl, "_blank");
-      } else {
+      
+      // Method 1: Try fetch + blob download (works in most WebViews)
+      const response = await fetch(downloadUrl);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
-        a.href = downloadUrl;
-        a.download = resource.fileName || "download";
-        a.target = "_blank";
+        a.href = url;
+        a.download = resource.fileName || resource.title || "download";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } else {
+        // Method 2: Fallback to direct link
+        window.location.href = downloadUrl;
       }
+    } catch {
+      // Method 3: Final fallback
+      window.location.href = `${resource.fileUrl}?download=1`;
+    } finally {
+      setTimeout(() => setDownloading(false), 1000);
     }
   };
 
@@ -333,10 +347,10 @@ export default function ResourceDetail() {
             <button
               onClick={handleDownload}
               className="btn-primary"
-              disabled={incrementDownload.isPending}
+              disabled={downloading}
             >
               <Download size={16} />
-              {incrementDownload.isPending ? "准备中..." : "下载资源"}
+              {downloading ? "下载中..." : "下载资源"}
             </button>
           ) : externalUrl ? (
             <a

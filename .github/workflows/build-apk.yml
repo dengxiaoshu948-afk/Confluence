@@ -67,26 +67,22 @@ jobs:
             echo "  Copied icon to mipmap-${density}/ic_launcher.png"
           done
           
-          # 4. Also copy as webp for newer Android versions that prefer webp
-          for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
-            target_dir="android/app/src/main/res/mipmap-${density}"
-            if command -v cwebp &> /dev/null; then
-              cwebp -q 90 "$target_dir/ic_launcher.png" -o "$target_dir/ic_launcher.webp" 2>/dev/null || true
-            fi
-          done
-          
-          # 5. Update AndroidManifest to not use roundIcon (which can cause issues)
-          sed -i 's/android:roundIcon="@mipmap\/ic_launcher_round"//g' android/app/src/main/AndroidManifest.xml || true
-          
           echo "=== Final icon files ==="
           find android/app/src/main/res -name "ic_launcher*" -type f | sort
+
+      - name: Update Android appName
+        run: |
+          # Update strings.xml app_name
+          sed -i 's/Confluence AI Hub/Confluence/g' android/app/src/main/res/values/strings.xml || true
+          echo "Updated appName in strings.xml"
+          cat android/app/src/main/res/values/strings.xml
 
       - name: Update version
         run: |
           # Update versionName and versionCode in build.gradle
-          sed -i 's/versionName "[^"]*"/versionName "0.6.0"/g' android/app/build.gradle
-          sed -i 's/versionCode [0-9]*/versionCode 6/g' android/app/build.gradle
-          echo "Updated version to 0.6.0 (code 6)"
+          sed -i 's/versionName "[^"]*"/versionName "0.6.1"/g' android/app/build.gradle
+          sed -i 's/versionCode [0-9]*/versionCode 7/g' android/app/build.gradle
+          echo "Updated version to 0.6.1 (code 7)"
           grep -E "versionName|versionCode" android/app/build.gradle
 
       - name: Build APK
@@ -104,15 +100,20 @@ jobs:
         continue-on-error: true
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v0.6.0
-          name: Confluence v0.6.0
+          tag_name: v0.6.1
+          name: Confluence v0.6.1
           body: |
-            Confluence AI Hub - Android APK
+            Confluence - Android APK v0.6.1
             
             ### 更新内容
-            - 全新APP图标设计
-            - 修复图标显示问题
-            - 版本号统一为 v0.6.0
+            - 全新深蓝科技流光APP图标
+            - 应用名称缩短为 Confluence
+            - 添加退出登录功能
+            - 修复下载功能（APP WebView兼容）
+            - 修复大文件上传（分片阈值降至10MB）
+            - 修复积分归属问题
+            - 底部导航栏更宽更均匀
+            - 增强日月切换光效
             
             ### 安装说明
             1. 下载 APK 文件

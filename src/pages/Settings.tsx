@@ -15,10 +15,11 @@ import {
   Trash2,
   RefreshCw,
   AlertCircle,
+  LogOut,
 } from "lucide-react";
 
 // Current app version - bump this on each release
-const APP_VERSION = "0.6.0";
+const APP_VERSION = "0.6.1";
 const GITHUB_RELEASE_URL = "https://api.github.com/repos/dengxiaoshu948-afk/confluence/releases/latest";
 
 export default function Settings() {
@@ -73,6 +74,20 @@ export default function Settings() {
       // Silently fail - user can manually check
     } finally {
       setCheckingUpdate(false);
+    }
+  };
+
+  const handleLogout = () => {
+    if (window.confirm("确定要退出登录吗？")) {
+      // Clear local auth token
+      localStorage.removeItem("local_auth_token");
+      // Clear OAuth session
+      document.cookie = "kimi_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie = "oauth_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      // Clear all auth-related cache
+      localStorage.removeItem("auth_user");
+      // Reload page
+      window.location.href = "/";
     }
   };
 
@@ -353,6 +368,15 @@ export default function Settings() {
                 清除缓存
               </>
             )}
+          </button>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-500/10 text-sm text-red-500 hover:bg-red-500/20 transition-all border border-red-500/20"
+          >
+            <LogOut size={14} />
+            退出登录
           </button>
         </div>
       </div>
